@@ -42,8 +42,8 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.getApiToken = catchAsync(async (req, res, next) => {
-  // const apiKey = 'a4b50434521144df923382d472aadfe1';
-  const apiKey = `bec11cbe12d24b09b8994166838e6729`;
+  const apiKey = 'a4b50434521144df923382d472aadfe1';
+  //const apiKey = `bec11cbe12d24b09b8994166838e6729`;
   // export const apiKey = 'a07dd624a99e47d3850afa68fa13d8fa';
   // export const apiKey = '5d4a7252555c47f2abc75fa0333de4bf';
   res.status(200).json({
