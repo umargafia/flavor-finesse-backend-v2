@@ -2,10 +2,12 @@ const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
+
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/email');
+const Favorite = require('./../models/favoriteModel');
 
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -40,17 +42,6 @@ const createSendToken = (user, statusCode, res) => {
     }
   });
 };
-
-exports.getApiToken = catchAsync(async (req, res, next) => {
-  const apiKey = 'a4b50434521144df923382d472aadfe1';
-  // const apiKey = `bec11cbe12d24b09b8994166838e6729`;
-  // export const apiKey = 'a07dd624a99e47d3850afa68fa13d8fa';
-  // export const apiKey = '5d4a7252555c47f2abc75fa0333de4bf';
-  res.status(200).json({
-    status: 'success',
-    apiKey
-  });
-});
 
 exports.signup = catchAsync(async (req, res, next) => {
   // Extract signup data from request body
@@ -276,8 +267,42 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMyAccount = catchAsync(async (req, res, next) => {
-  // get the user email and password
-  // verify password
+  const { identifier, password } = req.body;
+
+  // 1) Check if identifier and password exist
+  if (!identifier || !password) {
+    return next(new AppError('Please provide username and password!', 400));
+  }
+
+  // 2) Check if user exists && password is correct
+  const user = await User.findOne({
+    $or: [
+      { email: identifier }, // Check if the identifier matches the email field
+      { username: identifier } // Check if the identifier matches the username field
+    ]
+  }).select('+password');
+
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Incorrect username or password', 401));
+  }
+
   // delete user favorites
+  await Favorite.deleteMany({ user: user._id });
   // delete user data
+  await User.findByIdAndDelete(user._id);
+
+  res.status(204).json({
+    status: 'success'
+  });
+});
+
+exports.getApiToken = catchAsync(async (req, res, next) => {
+  const apiKey = 'a4b50434521144df923382d472aadfe1';
+  // const apiKey = `bec11cbe12d24b09b8994166838e6729`;
+  // export const apiKey = 'a07dd624a99e47d3850afa68fa13d8fa';
+  // export const apiKey = '5d4a7252555c47f2abc75fa0333de4bf';
+  res.status(200).json({
+    status: 'success',
+    apiKey
+  });
 });

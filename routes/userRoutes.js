@@ -9,7 +9,7 @@ router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 router.get('/getKey', authController.getApiToken);
-router.post('/deleteMyAccount', authController.deleteMyAccount);
+router.delete('/deleteMyAccount', authController.deleteMyAccount);
 
 // Protect all routes after this middleware
 router.use(authController.protect);
