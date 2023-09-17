@@ -279,5 +279,5 @@ exports.deleteMyAccount = catchAsync(async (req, res, next) => {
   // get the user email and password
   // verify password
   // delete user favorites
-  // delete user
+  // delete user data
 });
