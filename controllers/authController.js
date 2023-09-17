@@ -68,19 +68,22 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
   if (!email) {
     return next(new AppError('Email is required', 400));
-  } else if (!validator.isEmail(email)) {
+  }
+  if (!validator.isEmail(email)) {
     return next(new AppError('Invalid email address', 400));
   }
   if (!password) {
     return next(new AppError('Password is required', 400));
-  } else if (password.length < 8) {
+  }
+  if (password.length < 8) {
     return next(
       new AppError('Password must be at least 8 characters long', 400)
     );
   }
   if (!passwordConfirm) {
     return next(new AppError('Password confirmation is required', 400));
-  } else if (password !== passwordConfirm) {
+  }
+  if (password !== passwordConfirm) {
     return next(
       new AppError('Password confirmation does not match password', 400)
     );
@@ -271,7 +274,9 @@ exports.deleteMyAccount = catchAsync(async (req, res, next) => {
 
   // 1) Check if identifier and password exist
   if (!identifier || !password) {
-    return next(new AppError('Please provide username and password!', 400));
+    return next(
+      new AppError('Please provide username or email and password!', 400)
+    );
   }
 
   // 2) Check if user exists && password is correct
@@ -283,7 +288,10 @@ exports.deleteMyAccount = catchAsync(async (req, res, next) => {
   }).select('+password');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Incorrect username or password', 401));
+    return res.status(401).json({
+      status: 'fail',
+      message: 'Incorrect username or password'
+    });
   }
 
   // delete user favorites
